@@ -2,12 +2,15 @@ pipeline {
   agent any
   
    tools {nodejs "node"}
+  environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub-cred')
+    }
     
   stages {
     stage("Clone code from GitHub") {
             steps {
                 script {
-                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'GITHUB_CREDENTIALS', url: 'https://github.com/devopshint/Deploy-NodeApp-to-AWS-EKS-using-Jenkins-Pipeline']])
+                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-credential', url: 'https://github.com/muraliee/Deploy-NodeApp-to-AWS-EKS-using-Jenkins-Pipeline']])
                 }
             }
         }
@@ -18,24 +21,20 @@ pipeline {
       }
     }
   
-     stage('Build Node JS Docker Image') {
-            steps {
-                script {
-                  sh 'docker build -t devopshint/node-app-1.0 .'
-                }
+     stage('Build docker image') {
+            steps {  
+                sh 'docker build -t  mohanck/practice-images:$BUILD_NUMBER .'
             }
         }
-
-
-        stage('Deploy Docker Image to DockerHub') {
-            steps {
-                script {
-                 withCredentials([string(credentialsId: 'devopshintdocker', variable: 'devopshintdocker')]) {
-                    sh 'docker login -u devopshint -p ${devopshintdocker}'
+        stage('login to dockerhub') {
+            steps{
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
             }
-            sh 'docker push devopshint/node-app-1.0'
         }
-            }   
+        stage('push image') {
+            steps{
+                sh 'docker push mohanck/practice-images:$BUILD_NUMBER'
+            }
         }
          
      stage('Deploying Node App to Kubernetes') {
