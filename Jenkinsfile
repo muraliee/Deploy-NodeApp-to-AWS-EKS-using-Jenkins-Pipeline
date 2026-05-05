@@ -37,7 +37,7 @@ pipeline {
         }
         stage('push image') {
             steps{
-                sh 'docker push mohanck/practice-images:$BUILD_NUMBER'
+                sh 'docker push mohanck/practice-images'
             }
         }
          
