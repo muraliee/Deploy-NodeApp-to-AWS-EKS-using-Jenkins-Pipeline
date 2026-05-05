@@ -1,5 +1,8 @@
 pipeline {
   agent any
+  environment {
+    DOCKERHUB_CREDENTIALS = credentials('devopshintdocker')
+    }
   
    tools {nodejs "node"}
     
@@ -27,15 +30,15 @@ pipeline {
         }
 
 
-        stage('Deploy Docker Image to DockerHub') {
-            steps {
-                script {
-                 withCredentials([string(credentialsId: 'devopshintdocker', variable: 'devopshintdocker')]) {
-                    sh 'docker login -u devopshint -p ${devopshintdocker}'
+         stage('login to dockerhub') {
+            steps{
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
             }
-            sh 'docker push mohanck/practice-images:$BUILD_NUMBER'
         }
-            }   
+        stage('push image') {
+            steps{
+                sh 'docker push mohanck/practice-images:$BUILD_NUMBER'
+            }
         }
          
      stage('Deploying Node App to Kubernetes') {
