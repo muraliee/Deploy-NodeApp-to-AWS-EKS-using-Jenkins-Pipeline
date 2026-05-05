@@ -24,7 +24,7 @@ pipeline {
      stage('Build Node JS Docker Image') {
             steps {
                 script {
-                  sh 'docker build -t mohanck/practice-images:$BUILD_NUMBER .'
+                  sh 'docker build -t mohanck/practice-images .'
                 }
             }
         }
